@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+</head>
+<body>
+    <input id="ipInput" type="text"></input>
+    <br>
+    <br>
+
+    <button id="buttonViewCountry" onclick="getCountry()">View Country</button>
+    <br>
+    <br>
+    <table>
+        <tr>
+            <td>IP</td>
+            <td>:</td>
+            <td id="ipDisplay">Hello World</td>
+        </tr>
+        <tr>
+            <td>Country</td>
+            <td>:</td>
+            <td id="countryDisplay">Country</td>
+        </tr>
+    </table>
+    <script>
+        // function
+        // - func getCountry
+        // - func callApiGeoJs
+        // - func setLoading
+        // - func setText
+        // - func turnOfButton
+        // - func turnOnButton
+        // - func getRandomBool
+
+        // func getCountry
+        function getCountry() {
+
+            const ID_INPUT = "ipInput"
+            const ID_DISPLAY_IP = "ipDisplay"
+            const ID_DISPLAY_COUNTRY = "countryDisplay"
+            const ID_BUTTON = "buttonViewCountry"
+
+            // set loading
+            setLoading(ID_DISPLAY_IP)
+            setLoading(ID_DISPLAY_COUNTRY)
+            turnOfButton(ID_BUTTON)
+
+            // get ip address
+            ipAddress = document.getElementById(ID_INPUT).value
+
+            setTimeout(function () {
+                callApiGeoJs(ipAddress).then(
+                // handle success
+                function(response) {
+                    // set display ip and display country
+                    console.log(response)
+                    document.getElementById(ID_DISPLAY_IP).textContent = response.ip
+                    document.getElementById(ID_DISPLAY_COUNTRY).textContent = response.name
+                },
+
+                // handler error
+                function(error) {
+                    console.log(error)
+                    document.getElementById(ID_DISPLAY_IP).textContent = error.message
+                    document.getElementById(ID_DISPLAY_COUNTRY).textContent = error.message
+                }
+            ).finally(() => {
+                turnOnButton(ID_BUTTON)
+            })
+            }, 3000)
+        }
+
+
+        // func callApiGeoJs
+        async function callApiGeoJs(ipAddress) {
+
+            const ERR_CANT_CALL_SERVER = "MAAF GAGAL MENGHUBUNGI SERVER"
+            const ERR_IP_CANT_EMPTY = "MAAF IP TIDAK BOLEH KOSONG"
+            
+            // random success or fail
+            shouldSuccess = getRandomBool();
+
+            if (!shouldSuccess) {
+                throw new Error(ERR_CANT_CALL_SERVER)
+            }
+
+            if (ipAddress === "") {
+                throw new Error(ERR_IP_CANT_EMPTY)
+            }
+            
+            let response = await fetch("https://get.geojs.io/v1/ip/country.json?ip="+ipAddress)
+
+            if (response.status === 200) {
+                let data = await response.json() // it will return [{name: '', country_3: '', ip: '', country: ''}]
+                console.log(data)
+                // we only need first element in data
+                return data[0]
+            }
+
+            throw new Error(ERR_CANT_CALL_SERVER)
+        }
+
+        // func setLoading
+        function setLoading(id) {
+            console.log("setLoading")
+            const LOADING_TEXT  = "Loading"
+            
+            var element = document.getElementById(id);
+            element.textContent = LOADING_TEXT
+            turnOfButton(id)
+        }
+   
+        // func setText
+        function setText(id, text) {
+            var element = document.getElementById(id)
+            element.textContent = text
+        }
+  
+        // func turnOfButton
+        function turnOfButton(id) {
+            console.log("turnOfButton")
+
+            var element = document.getElementById(id)
+            element.disabled = true
+        }
+
+        // func turnOnButton
+        function turnOnButton(id) {
+            console.log("turnOnButton")
+            var element = document.getElementById(id)
+            element.disabled = false
+        }
+
+        // func getRandomBool
+        function getRandomBool() {
+            console.log("getRandomBool")
+            const MIN = 1
+            const MAX = 5
+            return (Math.floor(Math.random() * (MAX - MIN + 1)) + MIN) > 2;
+        }
+  </script>
+</body>
+</html>
